@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+        name="viewport">
+  <meta content="ie=edge" http-equiv="X-UA-Compatible">
+  <meta content="164853274143-0puc35h6ubak36rf9j9jkpso6qncs7o0.apps.googleusercontent.com"
+        name="google-signin-client_id">
+  <title>Demo Login Google</title>
+</head>
+<body>
+
+<h1>Google Sign In</h1>
+<div class="g-signin2" data-onsuccess="onSignIn"></div>
+<a href="#" onClick="signOut();">Sign out</a>
+
+
+<script async defer src="https://apis.google.com/js/platform.js"></script>
+<script>
+  function onSignIn(googleUser) {
+    var profile = googleUser.getBasicProfile();
+    console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+    console.log('Name: ' + profile.getName());
+    console.log('Image URL: ' + profile.getImageUrl());
+    console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+
+    var id_token = googleUser.getAuthResponse().id_token;
+    console.log(id_token);
+  }
+
+  function signOut() {
+    var auth2 = gapi.auth2.getAuthInstance();
+    auth2.signOut().then(function () {
+      console.log('User signed out.');
+    });
+  }
+</script>
+
+</body>
+</html>
