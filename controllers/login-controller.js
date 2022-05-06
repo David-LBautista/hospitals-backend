@@ -1,28 +1,27 @@
-const {response} = require("express");
-const User = require("../models/user");
+const { response } = require('express');
+const User = require('../models/user');
 const bcrypt = require('bcryptjs');
-const {generateJWT} = require("../helpers/jwt");
-const {googleVerify} = require("../helpers/google-verify");
-
+const { generateJWT } = require('../helpers/jwt');
+const { googleVerify } = require('../helpers/google-verify');
 
 const login = async (req, res = response) => {
-  const {email, password} = req.body;
+  const { email, password } = req.body;
 
   try {
-    const userDB = await User.findOne({email});
+    const userDB = await User.findOne({ email });
 
     if (!userDB) {
-      res.status(404).json({
+      return res.status(404).json({
         ok: false,
-        message: 'Email does not exists'
+        message: 'Email or password invalid',
       });
     }
     const validPassword = bcrypt.compareSync(password, userDB.password);
     if (!validPassword) {
       return res.status(400).json({
         ok: false,
-        message: 'Password invalid'
-      })
+        message: 'Email or password invalid',
+      });
     }
 
     // Generate token
@@ -31,24 +30,23 @@ const login = async (req, res = response) => {
     res.status(200).json({
       ok: true,
       message: 'Logged in',
-      token
-    })
+      token,
+    });
   } catch (error) {
     response.status(400).json({
       ok: false,
-      message: 'Unexpected error'
-    })
+      message: 'Unexpected error',
+    });
   }
-}
+};
 
 const googleSignIn = async (req, res = response) => {
-
   const googleToken = req.body.token;
 
   try {
-    const {name, email, picture} = await googleVerify(googleToken);
+    const { name, email, picture } = await googleVerify(googleToken);
 
-    const userDb = await User.findOne({email});
+    const userDb = await User.findOne({ email });
     let googleUser;
 
     if (!userDb) {
@@ -57,7 +55,7 @@ const googleSignIn = async (req, res = response) => {
         email,
         password: '@@@',
         img: picture,
-        google: true
+        google: true,
       });
     } else {
       googleUser = userDb;
@@ -70,29 +68,32 @@ const googleSignIn = async (req, res = response) => {
 
     res.status(200).json({
       ok: true,
-      token
-    })
+      token,
+    });
   } catch (error) {
     res.status(401).json({
       ok: false,
-      message: 'Unexpected error, Google token not valid'
-    })
+      message: 'Unexpected error, Google token not valid',
+    });
   }
-}
+};
 
 const renewToken = async (req, res = response) => {
   const uid = req.uid;
+
+  const userLoggedIn = await User.findById(uid);
 
   const token = await generateJWT(uid);
 
   res.status(200).json({
     ok: true,
-    token
-  })
-}
+    token,
+    userLoggedIn,
+  });
+};
 
 module.exports = {
   login,
   googleSignIn,
-  renewToken
-}
+  renewToken,
+};
