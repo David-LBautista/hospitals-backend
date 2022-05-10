@@ -10,11 +10,14 @@ const {
   deleteUser,
 } = require('../controllers/user-controllers');
 const { validateFields } = require('../middlewares/validateFields');
-const { validateJWT } = require('../middlewares/validate-jwt');
+const {
+  validateJWT,
+  validateAdminRole,
+} = require('../middlewares/validate-jwt');
 
 const router = Router();
 
-router.get('/', validateJWT, getUsers);
+router.get('/', [validateJWT, validateAdminRole], getUsers);
 
 router.post(
   '/',
@@ -30,7 +33,7 @@ router.post(
 router.put(
   '/:id',
   [
-    validateJWT,
+    [validateJWT, validateAdminRole],
     check('name', 'Name is required').not().isEmpty(),
     check('email', 'Email is required').isEmail(),
     validateFields,
@@ -38,6 +41,6 @@ router.put(
   updateUser
 );
 
-router.delete('/:id', validateJWT, deleteUser);
+router.delete('/:id', [validateJWT, validateAdminRole], deleteUser);
 
 module.exports = router;
